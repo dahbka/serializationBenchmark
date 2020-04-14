@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -80,6 +81,9 @@ func (s TestStruct) String() string {
 }
 
 var testSlice []TestStruct
+var testSliceJson []TestStruct
+var testSliceGob []TestStruct
+var testSliceXml []TestStruct
 
 func init() {
 	testSlice = make([]TestStruct, ALL)
@@ -154,57 +158,136 @@ func benchmark() {
 	}
 	//defer to close when you're done with it, not because you think it's idiomatic!
 	defer f.Close()
+
 	mw := io.MultiWriter(os.Stdout, f)
 	//set output of logs to f
+	log.SetOutput(mw)
 
 	startSer := time.Now()
 	gobbytes := toGobBytes()
-	endSer := time.Now()
-	startDes := time.Now()
 	ss1 := loadGobBytes(gobbytes)
+	endSer := time.Now()
+
+	fGobWrite, err := os.OpenFile("gob.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal("GobError: OpenFile ", err)
+	}
+
+	defer fGobWrite.Close()
+
+	encGob := gob.NewEncoder(fGobWrite)
+	if err := encGob.Encode(ss1); err != nil {
+		log.Fatal("GobError: Encode ", err)
+	}
+
+	startDes := time.Now()
+	fGobRead, err := ioutil.ReadFile("./gob.txt")
+	if err != nil {
+		log.Fatal("GobError: Read ", err)
+	}
+
+	dec := gob.NewDecoder(bytes.NewBuffer(fGobRead))
+	err = dec.Decode(&testSliceGob)
+	if err != nil {
+		log.Fatal("GobError: Decode ", err)
+	}
+
 	endDes := time.Now()
 
-	log.SetOutput(mw)
 	log.Println("GOB")
 	log.Printf("Serialization time: %d ns", endSer.Sub(startSer)/1000000)
 	log.Printf("Deserialization time: %d ns", endDes.Sub(startDes)/1000000)
-	log.Printf("Overall time: %d ns", endDes.Sub(startSer)/1000000)
+	log.Printf("Overall time: %d ns", (endSer.Sub(startSer)+endDes.Sub(startDes))/1000000)
 
 	log.Println("serialized size in bytes: ", len(gobbytes))
-	if len(ss1) != len(testSlice) {
+	if len(testSliceGob) != len(testSlice) {
 		fmt.Println("bug")
 	}
 
 	startSer = time.Now()
 	jsonbytes := toJsonBytes()
-	endSer = time.Now()
-	startDes = time.Now()
 	ss2 := loadJsonBytes(jsonbytes)
+	endSer = time.Now()
+
+	fJsonWrite, err := os.OpenFile("json.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal("JsonError: Open ", err)
+	}
+
+	defer fJsonWrite.Close()
+
+	encJson := json.NewEncoder(fJsonWrite)
+	if err := encJson.Encode(ss2); err != nil {
+		log.Fatal("JsonError: Encode ", err)
+	}
+
+	startDes = time.Now()
+	fJsonRead, err := ioutil.ReadFile("./json.txt")
+	if err != nil {
+		log.Fatal("JsonError: Read ", err)
+	}
+
+	err = json.Unmarshal(fJsonRead, &testSliceJson)
+	if err != nil {
+		log.Fatal("JsonError: Unmarshal ", err)
+	}
 	endDes = time.Now()
 
 	log.Println("JSON")
 	log.Printf("Serialization time: %d ns", endSer.Sub(startSer)/1000000)
 	log.Printf("Deserialization time: %d ns", endDes.Sub(startDes)/1000000)
-	log.Printf("Overall time: %d ns", endDes.Sub(startSer)/1000000)
+	log.Printf("Overall time: %d ns", (endSer.Sub(startSer)+endDes.Sub(startDes))/1000000)
 
 	log.Println("serialized size in bytes: ", len(jsonbytes))
 
-	if len(ss2) != len(testSlice) {
+	if len(testSliceJson) != len(testSlice) {
 		fmt.Println("bug")
 	}
+
 	startSer = time.Now()
 	xmlbytes := toXmlBytes()
-	endSer = time.Now()
-	startDes = time.Now()
 	ss3 := loadXmlBytes(xmlbytes)
+	endSer = time.Now()
+
+	fXmlWrite, err := os.OpenFile("xml.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal("XmlError: Open ", err)
+	}
+
+	defer fXmlWrite.Close()
+
+	encXml := xml.NewEncoder(fXmlWrite)
+	if err := encXml.Encode(ss3); err != nil {
+		log.Fatal("XmlError: Encode ", err)
+	}
+
+	startDes = time.Now()
+	fXmlRead, err := ioutil.ReadFile("./xml.txt")
+	if err != nil {
+		log.Fatal("XmlError: Read ", err)
+	}
+
+	decxml := xml.NewDecoder(bytes.NewBuffer(fXmlRead))
+	for {
+		var buff TestStruct
+		err := decxml.Decode(&buff)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal("XmlError: Decode ", err)
+		}
+		testSliceXml = append(testSliceXml, buff)
+	}
 	endDes = time.Now()
+
 	log.Println("XML")
 	log.Printf("Serialization time: %d ns", endSer.Sub(startSer)/1000000)
 	log.Printf("Deserialization time: %d ns", endDes.Sub(startDes)/1000000)
-	log.Printf("Overall time: %d ns", endDes.Sub(startSer)/1000000)
+	log.Printf("Overall time: %d ns", (endSer.Sub(startSer)+endDes.Sub(startDes))/1000000)
 
 	log.Println("serialized size in bytes: ", len(xmlbytes))
-	if len(ss3) != len(testSlice) {
+	if len(testSliceXml) != len(testSlice) {
 		fmt.Println("bug")
 	}
 
