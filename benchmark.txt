@@ -1,0 +1,15 @@
+2020/04/14 15:53:52 GOB
+2020/04/14 15:53:52 Serialization time: 40 ns
+2020/04/14 15:53:52 Deserialization time: 19 ns
+2020/04/14 15:53:52 Overall time: 60 ns
+2020/04/14 15:53:52 serialized size in bytes:  10025267
+2020/04/14 15:53:52 JSON
+2020/04/14 15:53:52 Serialization time: 95 ns
+2020/04/14 15:53:52 Deserialization time: 374 ns
+2020/04/14 15:53:52 Overall time: 470 ns
+2020/04/14 15:53:52 serialized size in bytes:  20969126
+2020/04/14 15:53:55 XML
+2020/04/14 15:53:55 Serialization time: 555 ns
+2020/04/14 15:53:55 Deserialization time: 2394 ns
+2020/04/14 15:53:55 Overall time: 2950 ns
+2020/04/14 15:53:55 serialized size in bytes:  20969126
