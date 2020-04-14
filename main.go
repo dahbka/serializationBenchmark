@@ -203,7 +203,7 @@ func benchmark() {
 	log.Printf("Deserialization time: %d ns", endDes.Sub(startDes)/1000000)
 	log.Printf("Overall time: %d ns", endDes.Sub(startSer)/1000000)
 
-	log.Println("serialized size in bytes: ", len(jsonbytes))
+	log.Println("serialized size in bytes: ", len(xmlbytes))
 	if len(ss3) != len(testSlice) {
 		fmt.Println("bug")
 	}
