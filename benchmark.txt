@@ -1,15 +1,15 @@
-2020/04/14 18:15:30 GOB
-2020/04/14 18:15:30 Serialization time: 69 ns
-2020/04/14 18:15:30 Deserialization time: 33 ns
-2020/04/14 18:15:30 Overall time: 103 ns
-2020/04/14 18:15:30 serialized size in bytes:  10025267
-2020/04/14 18:15:31 JSON
-2020/04/14 18:15:31 Serialization time: 474 ns
-2020/04/14 18:15:31 Deserialization time: 404 ns
-2020/04/14 18:15:31 Overall time: 879 ns
-2020/04/14 18:15:31 serialized size in bytes:  20969126
-2020/04/14 18:15:37 XML
-2020/04/14 18:15:37 Serialization time: 2942 ns
-2020/04/14 18:15:37 Deserialization time: 2447 ns
-2020/04/14 18:15:37 Overall time: 5390 ns
-2020/04/14 18:15:37 serialized size in bytes:  35009125
+2020/04/14 19:09:22 GOB
+2020/04/14 19:09:22 Serialization time: 529 ns
+2020/04/14 19:09:22 Deserialization time: 342 ns
+2020/04/14 19:09:22 Overall time: 872 ns
+2020/04/14 19:09:22 serialized size in bytes:  102590
+2020/04/14 19:09:31 JSON
+2020/04/14 19:09:31 Serialization time: 4895 ns
+2020/04/14 19:09:31 Deserialization time: 3948 ns
+2020/04/14 19:09:31 Overall time: 8844 ns
+2020/04/14 19:09:31 serialized size in bytes:  217722
+2020/04/14 19:10:28 XML
+2020/04/14 19:10:28 Serialization time: 31755 ns
+2020/04/14 19:10:28 Deserialization time: 25625 ns
+2020/04/14 19:10:28 Overall time: 57381 ns
+2020/04/14 19:10:28 serialized size in bytes:  361721

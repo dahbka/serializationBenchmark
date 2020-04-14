@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	ALL = 1000
+	ALL        = 100
+	ITERATIONS = 1000
 )
 
 /**
@@ -150,22 +151,24 @@ func loadXmlBytes(input []byte) []TestStruct {
 }
 
 func benchmark() {
-	//create your file with desired read/write permissions
 
 	f, err := os.OpenFile("benchmark.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//defer to close when you're done with it, not because you think it's idiomatic!
+
 	defer f.Close()
 
 	mw := io.MultiWriter(os.Stdout, f)
 	//set output of logs to f
 	log.SetOutput(mw)
-
+	var ss1 []TestStruct
+	var gobbytes []byte
 	startSer := time.Now()
-	gobbytes := toGobBytes()
-	ss1 := loadGobBytes(gobbytes)
+	for i := 0; i < ITERATIONS; i++ {
+		gobbytes = toGobBytes()
+		ss1 = loadGobBytes(gobbytes)
+	}
 	endSer := time.Now()
 
 	fGobWrite, err := os.OpenFile("gob.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
@@ -181,17 +184,18 @@ func benchmark() {
 	}
 
 	startDes := time.Now()
-	fGobRead, err := ioutil.ReadFile("./gob.txt")
-	if err != nil {
-		log.Fatal("GobError: Read ", err)
-	}
+	for i := 0; i < ITERATIONS; i++ {
+		fGobRead, err := ioutil.ReadFile("./gob.txt")
+		if err != nil {
+			log.Fatal("GobError: Read ", err)
+		}
 
-	dec := gob.NewDecoder(bytes.NewBuffer(fGobRead))
-	err = dec.Decode(&testSliceGob)
-	if err != nil {
-		log.Fatal("GobError: Decode ", err)
+		dec := gob.NewDecoder(bytes.NewBuffer(fGobRead))
+		err = dec.Decode(&testSliceGob)
+		if err != nil {
+			log.Fatal("GobError: Decode ", err)
+		}
 	}
-
 	endDes := time.Now()
 
 	log.Println("GOB")
@@ -203,12 +207,14 @@ func benchmark() {
 	if len(testSliceGob) != len(testSlice) {
 		fmt.Println("bug")
 	}
-
+	var ss2 []TestStruct
+	var jsonbytes []byte
 	startSer = time.Now()
-	jsonbytes := toJsonBytes()
-	ss2 := loadJsonBytes(jsonbytes)
+	for i := 0; i < ITERATIONS; i++ {
+		jsonbytes = toJsonBytes()
+		ss2 = loadJsonBytes(jsonbytes)
+	}
 	endSer = time.Now()
-
 	fJsonWrite, err := os.OpenFile("json.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal("JsonError: Open ", err)
@@ -220,16 +226,17 @@ func benchmark() {
 	if err := encJson.Encode(ss2); err != nil {
 		log.Fatal("JsonError: Encode ", err)
 	}
-
 	startDes = time.Now()
-	fJsonRead, err := ioutil.ReadFile("./json.txt")
-	if err != nil {
-		log.Fatal("JsonError: Read ", err)
-	}
+	for i := 0; i < ITERATIONS; i++ {
+		fJsonRead, err := ioutil.ReadFile("./json.txt")
+		if err != nil {
+			log.Fatal("JsonError: Read ", err)
+		}
 
-	err = json.Unmarshal(fJsonRead, &testSliceJson)
-	if err != nil {
-		log.Fatal("JsonError: Unmarshal ", err)
+		err = json.Unmarshal(fJsonRead, &testSliceJson)
+		if err != nil {
+			log.Fatal("JsonError: Unmarshal ", err)
+		}
 	}
 	endDes = time.Now()
 
@@ -244,9 +251,13 @@ func benchmark() {
 		fmt.Println("bug")
 	}
 
+	var xmlbytes []byte
+	var ss3 []TestStruct
 	startSer = time.Now()
-	xmlbytes := toXmlBytes()
-	ss3 := loadXmlBytes(xmlbytes)
+	for i := 0; i < ITERATIONS; i++ {
+		xmlbytes = toXmlBytes()
+		ss3 = loadXmlBytes(xmlbytes)
+	}
 	endSer = time.Now()
 
 	fXmlWrite, err := os.OpenFile("xml.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
@@ -262,22 +273,26 @@ func benchmark() {
 	}
 
 	startDes = time.Now()
-	fXmlRead, err := ioutil.ReadFile("./xml.txt")
-	if err != nil {
-		log.Fatal("XmlError: Read ", err)
-	}
-
-	decxml := xml.NewDecoder(bytes.NewBuffer(fXmlRead))
-	for {
-		var buff TestStruct
-		err := decxml.Decode(&buff)
-		if err == io.EOF {
-			break
-		}
+	for i := 0; i < ITERATIONS; i++ {
+		testSliceXml = []TestStruct{}
+		fXmlRead, err := ioutil.ReadFile("./xml.txt")
 		if err != nil {
-			log.Fatal("XmlError: Decode ", err)
+			log.Fatal("XmlError: Read ", err)
 		}
-		testSliceXml = append(testSliceXml, buff)
+
+		decxml := xml.NewDecoder(bytes.NewBuffer(fXmlRead))
+		for {
+			var buff TestStruct
+			err := decxml.Decode(&buff)
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatal("XmlError: Decode ", err)
+			}
+			testSliceXml = append(testSliceXml, buff)
+		}
+
 	}
 	endDes = time.Now()
 
@@ -295,5 +310,6 @@ func benchmark() {
 
 func main() {
 	fmt.Println("Array size: ", len(testSlice))
+	fmt.Println("Number of iterations: ", ITERATIONS)
 	benchmark()
 }
